@@ -1,7 +1,7 @@
 # COSPA
 ## Complex-valued Spatial Autoencoders for Multichannel Speech Enhancement
 
-In this repository you will find exemplary results from our yet-to-be-published paper *Complex Spatial Autoencoders for Multichannel Speech Enhancement*. 
+In this repository you will find exemplary results from our yet-to-be-published paper *Complex-valued Spatial Autoencoders for Multichannel Speech Enhancement*. 
 
 In addition, we are committed to publishing our source code once the paper is accepted. 
 
