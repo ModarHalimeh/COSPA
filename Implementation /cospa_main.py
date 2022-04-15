@@ -1,15 +1,19 @@
+# This file is used to train and test a COSPA instance using the specified training/testing datasets
+
+# Network name, used for saving results and identifying the network later in logs
 networkName = 'cospa_shorttest'
 
+# parameters 
 cfg = {}
-cfg['nr_channels']          = 5
-cfg['NetName']              = networkName + '_' + str(cfg['nr_channels'])
+cfg['nr_channels']          = 5 # number of mic channels 
+cfg['NetName']              = networkName + '_' + str(cfg['nr_channels']) # final name given to the network 
 
-cfg['frame_shift']     = 512
+cfg['frame_shift']     = 512 
 cfg['block_length']    = cfg['frame_shift']*2
 cfg['nfft']            = cfg['block_length']
 
 
-
+# CRUnet settings - number of encoder/decoder layers, kernel sizes, padding, etc. 
 cfgEncoder = {}
 cfgEncoder['encoders'] = {}
 cfgEncoder['encoders'][0] = [1,  64, [7, 2], [4, 1], [6, 1]]
@@ -23,13 +27,15 @@ cfgEncoder['decoders'][1] = [16+16,   32,  [4, 2], [2, 1], [3, 1]]
 cfgEncoder['decoders'][2] = [32+32,   64,  [5, 1], [2, 1], [4, 0]]
 cfgEncoder['decoders'][3] = [64+64,    1,  [7, 2], [4, 1], [6, 1]]
 
+# GRU ip/op dimensions 
 cfgEncoder['GRUdim']        = 120
 cfgEncoder['GRUIN']         = 304
 
-
+# 1-d conv. layer parameters
 cfgCompressor = {}
 cfgCompressor    = [1,  1, [7, 1], [2, 1], [6, 0]]
 
+# Compandor parameters 
 cfgCompandor = {}
 cfgCompandor['layer1_in']  = 260*cfg['nr_channels']*2
 cfgCompandor['layer1_out'] = 128
@@ -40,6 +46,7 @@ cfgCompandor['gru_out'] = 128
 cfgCompandor['layer2_in']  = 128
 cfgCompandor['layer2_out'] = 513*cfg['nr_channels']
 
+# Decoders parameters 
 cfgDecoder = {}
 cfgDecoder['layer1_in']  = 513
 cfgDecoder['layer1_out'] = 256
@@ -50,7 +57,7 @@ cfgDecoder['layer2_out'] = 256
 cfgDecoder['layer3_in']  = 256
 cfgDecoder['layer3_out'] = cfg['frame_shift']+1
 
-
+# Datasets paths and filenames - uses .hdf5, you can use other tpyes. 
 cfg['outPATH']          = 'train_data.hdf5'
 cfg['inPATH']           = 'Directory_path_to_source_training_mat_files'
 cfg['outPATH_test']     = 'test_data2.hdf5'
@@ -88,7 +95,7 @@ testLoader             = DataLoader(test_set, batch_size=5, num_workers=3)
 
 net = mc_cospa.COSPA(cfg, cfgEncoder, cfgCompressor, cfgCompandor, cfgDecoder)
 TBlogger = pl_loggers.TensorBoardLogger('logs/' + cfg['NetName'])
-cfg['checkpoint_name']       = './results/model_baseline.tar'
+cfg['checkpoint_name']       = './results/' + + cfg['NetName'] + '.tar'
 
 trainer = pl.Trainer(logger=TBlogger, log_every_n_steps=4, gpus=1, max_epochs=26)
 
