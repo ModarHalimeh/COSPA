@@ -5,7 +5,7 @@ import numpy as np
 from torch.utils import data
 import scipy.io as io
 
-hdf5_directory = '/media/halimeh/NVME_1TB/COSPA/cDNN_for_SE/HDF5_datasets/'
+hdf5_directory = 'hdf5-filepath'
 
 sig_duration    = 7
 sample_freq     = 16000
