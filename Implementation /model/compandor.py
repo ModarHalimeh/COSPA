@@ -92,6 +92,7 @@ class compandor(torch.nn.Module):
         self.nr_channels    = nr_channels
 
     def dearrange_channels(self, xr, xi):
+        # decompose the single, long output vector, into M (nr. of channels) excitation vectors
         xr_unwrapped  = xr[..., :self.nfft].unsqueeze(dim=3)
         xi_unwrapped  = xi[..., :self.nfft].unsqueeze(dim=3)
         for ind in range(1, self.nr_channels):
