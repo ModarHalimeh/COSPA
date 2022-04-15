@@ -3,7 +3,7 @@
 
 In this repository you will find exemplary results from our yet-to-be-published paper *Complex-valued Spatial Autoencoders for Multichannel Speech Enhancement*. 
 
-In addition, we are committed to publishing our source code once the paper is accepted. 
+In addition, you can find the implementation code, using Pytorch, of the proposed COSPA. 
 
 
 ### Audio examples 
