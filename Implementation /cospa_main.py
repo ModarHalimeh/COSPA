@@ -52,17 +52,15 @@ cfgDecoder['layer3_out'] = cfg['frame_shift']+1
 
 
 cfg['outPATH']          = 'train_data.hdf5'
-cfg['inPATH']           = '/media/halimeh/NVME_1TB/COSPA/MAT_data/synth/train/'
+cfg['inPATH']           = 'Directory_path_to_source_training_mat_files'
 cfg['outPATH_test']     = 'test_data2.hdf5'
-cfg['inPATH_test']      = '/media/halimeh/NVME_1TB/COSPA/MAT_data/synth/test2/'
-cfg['outPATH_test_real']     = 'test_data_real.hdf5'
-cfg['inPATH_test_real']      = '/media/halimeh/NVME_1TB/COSPA/MAT_data/real/test/'
+cfg['inPATH_test']      = 'Directory_path_to_source_testing_mat_files'
 
 
 cfg['hop_length']    = cfg['frame_shift']
 cfg['n_fft']         = cfg['block_length']
 
-cfg['batch_size']       =10 #10 originally for results shown to wk
+cfg['batch_size']       =10 
 
 
 from datasets import dataLoaders
@@ -87,10 +85,6 @@ cfg['inPATH']           = cfg['inPATH_test']
 test_set = dataLoaders.mcDNN_test_dataset(cfg)
 testLoader             = DataLoader(test_set, batch_size=5, num_workers=3)
 
-cfg['outPATH']          = cfg['outPATH_test_real']
-cfg['inPATH']           = cfg['inPATH_test_real']
-real_testset            = dataLoaders.mcDNN_test_dataset(cfg)
-real_testLoader         = DataLoader(real_testset, batch_size=5, num_workers=3)
 
 net = mc_cospa.COSPA(cfg, cfgEncoder, cfgCompressor, cfgCompandor, cfgDecoder)
 TBlogger = pl_loggers.TensorBoardLogger('logs/' + cfg['NetName'])
