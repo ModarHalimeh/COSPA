@@ -26,7 +26,7 @@ class COSPA(pl.LightningModule):
         self.net_name    = cfg['NetName']
         self.nfft        = hop_length + 1
 
-        self.encoder           = CRUNet(cfgEncoder)
+        self.encoder           = CRUNet(cfgEncoder) 
 
         self.compressor_noise  = compressor(cfgCompressor)
         self.compressor_source = compressor(cfgCompressor)
@@ -48,7 +48,7 @@ class COSPA(pl.LightningModule):
         return mag * torch.cos(phase), mag * torch.sin(phase)
 
     def forward(self, xr, xi):
-
+        ########## Spatial encoders ###################
         xr_sc, xi_sc     = xr[..., 0], xi[..., 0]
         o_r_sc, o_i_sc   = self.encoder(xr_sc, xi_sc)
 
@@ -87,14 +87,15 @@ class COSPA(pl.LightningModule):
             xi_noise = torch.cat((xi_noise, xi_noise_local), dim=1)
 
         xr, xi = torch.cat((xr_source, xr_noise), dim=1), torch.cat((xi_source, xi_noise), dim=1)
-
+        
+        ########## Spatial Compandor ###################
         xr, xi = self.compandor(xr, xi)
 
-
+        ########## Spatial Decoders ####################
         o_r, o_i    = self.decoder(xr[..., 0], xi[..., 0])
         mag, phase  = self.get_ratio_mask(o_r, o_i)
         mag, phase  = mag.unsqueeze(dim=3), phase.unsqueeze(dim=3)
-
+        
         for ind in range(1, self.nr_channels):
             o_r, o_i = self.decoder(xr[..., ind], xi[..., ind])
             mag_local, phase_local = self.get_ratio_mask(o_r, o_i)
@@ -120,11 +121,7 @@ class COSPA(pl.LightningModule):
             y           = y + estimated
         estimated = y.squeeze()
 
-        if self.nr_channels == 5:
-            target_ch = 2
-        else:
-            target_ch = self.nr_channels-2
-        source_target    = source_target[..., target_ch]
+        source_target    = source_target
         source_target    = stft(source_target).squeeze()
         source_target    = istft(source_target[..., 0], source_target[..., 1])
         source_target    = source_target.squeeze()
@@ -158,11 +155,7 @@ class COSPA(pl.LightningModule):
                 y = y + estimated
             estimated = y.squeeze()
 
-            if self.nr_channels == 5:
-                target_ch = 2
-            else:
-                target_ch = self.nr_channels - 2
-            source_target = source_target[..., target_ch]
+            source_target = source_target
             source_target = stft(source_target).squeeze()
             source_target = istft(source_target[..., 0], source_target[..., 1])
             source_target = source_target.squeeze()
@@ -179,7 +172,6 @@ class COSPA(pl.LightningModule):
 
         dir_noise = torch.cat((dir_noise, source_mic.unsqueeze(dim=5)), dim=5)
         dir_noise = torch.cat((dir_noise, noise_mic.unsqueeze(dim=5)), dim=5)
-
 
         xr, xi = mix_mic_f[..., 0, :self.nr_channels].unsqueeze(dim=1), mix_mic_f[..., 1, :self.nr_channels].unsqueeze(dim=1)
 
