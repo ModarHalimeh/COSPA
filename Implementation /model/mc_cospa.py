@@ -189,9 +189,6 @@ class COSPA(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         mix_mic_logf, mix_mic_f, source_target, mix_mic, source_mic, noise_mic, dir_noise, filename = batch
 
-        dir_noise = torch.cat((dir_noise, source_mic.unsqueeze(dim=5)), dim=5)
-        dir_noise = torch.cat((dir_noise, noise_mic.unsqueeze(dim=5)), dim=5)
-
         xr, xi = mix_mic_f[..., 0, :self.nr_channels].unsqueeze(dim=1), mix_mic_f[..., 1, :self.nr_channels].unsqueeze(dim=1)
 
         mag, phase = self(xr, xi)
@@ -206,31 +203,16 @@ class COSPA(pl.LightningModule):
             y = y + estimated
         estimated = y.squeeze()
 
-        filtered_noise_t                = torch.zeros(estimated.squeeze().shape, device=estimated.device).unsqueeze(dim=2)
-        nrAngles                        = len(dir_noise[0, 0, 0, 0, 0, :])
 
-        for angleInd in range(0, nrAngles):
-            xr, xi                   = dir_noise[:, :, :, 0, :, angleInd], dir_noise[:, :, :, 1, :, angleInd]
-            filtered_noise_t_current = 0
-            for micInd in range(0, self.nr_channels):
-                xr_m, xi_m                   = self.apply_mask(xr[..., micInd], xi[..., micInd], mag[..., micInd], phase[..., micInd])
-                filtered_noise_t_current = filtered_noise_t_current + istft(xr_m.squeeze(), xi_m.squeeze()).squeeze().unsqueeze(dim=2)
-            filtered_noise_t         = torch.cat((filtered_noise_t, filtered_noise_t_current), dim=2)
-
+        # save results as .mat structures into a given results directory 
         for fileInd in range(0, len(filename)):
             s_hat    = estimated[fileInd, :]
             y_mix    = mix_mic[fileInd, :, :]
-            filtered_noise      = filtered_noise_t[fileInd, :, :-2]
-            filtered_source     = filtered_noise_t[fileInd, :, -2]
-            filtered_noiseOnly  = filtered_noise_t[fileInd, :, -1]
             file     = filename[fileInd]
 
             sig= {}
             sig['s_hat']            = s_hat.detach().cpu().numpy()
             sig['y']                = y_mix.detach().cpu().numpy()
-            sig['filt_dir_noise']   = filtered_noise.detach().cpu().numpy()
-            sig['filt_source'] = filtered_source.detach().cpu().numpy()
-            sig['filt_noise'] = filtered_noiseOnly.detach().cpu().numpy()
 
             if not os.path.isdir('./results/' + self.net_name):
                 os.mkdir('./results/' + self.net_name)
