@@ -129,7 +129,7 @@ class mcDNN_train_dataset(data.Dataset):
 
 
         mix_target      = item['mix_mvdr'][()].astype(np.float32)
-        mix_target      = mix_target[511:, :]
+        #mix_target      = mix_target[511:, :] # might need to account for algorithmic delays, depends on your target
         mix_target      = torch.from_numpy(mix_target)
 
 
@@ -205,7 +205,7 @@ class mcDNN_test_dataset(data.Dataset):
         source_mic = torch.from_numpy(source_mic)
         source_mic = STFT_across_channels(source_mic)
 
-        dir_noise = item['dir_noise'][()].astype(np.float32)
+        dir_noise = item['dir_noise'][()].astype(np.float32) # dir_noise are the white noise sources used in the paper to generated the beampattern
         dir_noise = torch.from_numpy(dir_noise)
         nr_angles = len(dir_noise[0, 0, :])
         nr_frames = len(mix_mic_f[0, :, 0, 0])
